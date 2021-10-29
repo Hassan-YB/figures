@@ -1,0 +1,24 @@
+{% extends 'databases/home.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row d-flex justify-content-center">
+        <h3 style="padding-top:10px;">Databases</h3>
+    </div>
+    <div class="col">
+
+        <div class="card">
+            <h5 class="card-header">Databases</h5>
+            <div class="card-body">
+                {% comment %} <h5 class="card-title">Collection</h5> {% endcomment %}
+                {% for i in db %}
+                    {% if i.pic %}
+                        <a href="{% url 'details' i.id %}"><img class="db-img" src="{{i.pic.url}}"><img></a>
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+        </div>
+
+{% endblock %}

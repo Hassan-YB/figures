@@ -1,0 +1,692 @@
+{% extends 'databases/home.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row d-flex justify-content-center">
+        <h3 style="padding-top:10px;">Add an entry</h3>
+    </div>
+    <div class="col">
+    <form method="POST" action="{% url 'database' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %} 
+        
+        <section>
+            <div class="row head-bg overflow-hidden">
+            <h4 class="col-2">Category</h4>
+            </div>
+            {% for c in category %}
+                <a class="cat-btn" id="{{c.root}}" name="myBtn"  id="category" style="text-decoration:none;cursor: pointer;"><i class="fa fa-check"></i>    {{c.root}} </a>
+            {% endfor %}
+            <br>
+            <div class="subcategory">
+            {% for s in subcategory  %}
+               <input type="checkbox" class="{{s.root.root}}" value="{{s.id}}" name="subcategory" {% if s.root.root != 'Figures' %} style="display:none;" {% endif %}> <span class="{{s.root.root}}" value="{{s.root.root}}" {% if s.root.root != 'Figures' %} style="display:none;" {% endif %}>{{s.subcategory}}</span>
+            {% endfor %}
+            </div>
+        </section>
+
+        <section>
+            <div class="row head-bg">
+            <h4 class="col-2">Pictures</h4>
+            </div>
+            <p>JPEG (.jpg), GIF (.gif) or PNG (.png); 2048x2048 (1 MB) maximum; 72x72 minimum.</p>
+            <br>
+            <div class="db_pictures">
+                <input type="file" name="pic1" accept="image/*" required>
+            </div>
+             <hr>
+             <input type="checkbox" name="nsfw" value="True"><span>NSFW</span>
+             {% comment %} <button type="button" id="add_pic" class="btn btn-secondary">Add More Pictures</button> {% endcomment %}
+        </section>
+
+        <section class="entries">
+            <div class="row head-bg">
+            <h4 class="col-2">Entries</h4>
+            </div>
+
+            <p>Origins</p>
+            <span>Anime, Manga, Video-games, etc.</span>
+            <br>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#origin-modal" value="origins">
+            <i class="fa fa-eyedropper" aria-hidden="true"></i>  Pick
+            </button>
+            <input id="origin" name="origin" type="text"  class="btn btn-secondary" readonly>
+            <br>
+
+            <p>Characters</p>
+            <span>Last Name + First Name</span>
+            <br>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#character-modal">
+            <i class="fa fa-eyedropper" aria-hidden="true"></i>  Pick
+            </button>
+            <input id="character" name="character" type="text"  class="btn btn-secondary" readonly>
+            <br>
+
+            <p>Companies</p>
+            <span>Manufacturer, Publisher, Label, etc.;</span><span style="color:red"> At least one company (not as Copyright holder) is </span>
+            <br>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#company-modal">
+            <i class="fa fa-eyedropper" aria-hidden="true"></i>  Pick
+            </button>
+            <input id="company" name="company" type="text"  class="btn btn-secondary" readonly>
+            <br>
+
+            <p>Artists</p>
+            <span>Sculptor, Composer, Peformer, etc.</span>
+            <br>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#artist-modal">
+            <i class="fa fa-eyedropper" aria-hidden="true"></i>  Pick
+            </button>
+            <input id="artist" name="artist" type="text"  class="btn btn-secondary" readonly>
+            <br>
+
+            <p>Classifications</p>
+            <span>Types (e.g. Dakimakura, T-Shirt, Opening Theme), Product lines (e.g. Nendoroid, Figma), Series (e.g. Beach Queens)</span>
+            <br>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#classification-modal">
+            <i class="fa fa-eyedropper" aria-hidden="true"></i>  Pick
+            </button>
+            <input id="classification" name="classification" type="text"  class="btn btn-secondary" readonly>
+            <br>
+
+            <p>Materials</p>
+            <span>PVC, ABS, Cotton, etc..</span>
+            <br>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#material-modal">
+            <i class="fa fa-eyedropper" aria-hidden="true"></i>  Pick
+            </button>
+            <input id="material" name="material" type="text"  class="btn btn-secondary" readonly>
+            <br>
+
+            <p>Events</p>
+            <span>Wonder Festival 2015 [Winter], Comic Market 89, etc.</span>
+            <br>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-light" data-toggle="modal" data-target="#event-modal">
+            <i class="fa fa-eyedropper" aria-hidden="true"></i>  Pick
+            </button>
+            <input id="event" name="event" type="text"  class="btn btn-secondary" readonly>
+            <br>
+
+            <input id="url" type="text" value="" hidden>
+            <!-- Origins Modal -->
+            <div class="modal fade" id="origin-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Origins</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   <table  class="example table table-striped table-bordered" style="width:100%">
+                    
+                    <thead>
+                        <tr>
+                        <th>Origins</th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody>
+                    {% if origins %}
+                        {% for o in origins %}
+                            <tr>
+                                <td><p class="origin" value="{{o.name}}" name="{{o.id}}" style="text-decoration:none;cursor:pointer">{{o.name}}</p><p>{{o.original_name}}</p></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Origin')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% else %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Origin')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                        
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+            <!-- Characters Modal -->
+            <div class="modal fade" id="character-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Characters</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   <table  class="example table table-striped table-bordered" style="width:100%">
+                    
+                    <thead>
+                        <tr>
+                        <th>Characters</th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody>
+                    {% if characters %}
+                        {% for o in characters %}
+                            <tr>
+                                <td><a class="character" value="{{o.name}}" name="{{o.id}}" >{{o.name}}<br><p>{{o.original_name}}</p></a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Character')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% else %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Character')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                        
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+            <!-- Companies Modal -->
+            <div class="modal fade" id="company-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Companies</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   <table  class="example table table-striped table-bordered" style="width:100%">
+                    
+                    <thead>
+                        <tr>
+                        <th>Companies</th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody>
+                    {% if companies %}
+                        {% for o in companies %}
+                            <tr>
+                                <td><a class="company" value="{{o.name}}" name="{{o.id}}">{{o.name}}<br><p>{{o.original_name}}</p></a></td>
+                            </tr>
+                        {% endfor %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Company')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% else %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Company')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                        
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+            <!-- Artists Modal -->
+            <div class="modal fade" id="artist-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Artists</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   <table  class="example table table-striped table-bordered" style="width:100%">
+                    
+                    <thead>
+                        <tr>
+                        <th>Artists</th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody>
+                    {% if artists %}
+                        {% for o in artists %}
+                            <tr>
+                                <td><a class="artist" value="{{o.name}}" name="{{o.id}}">{{o.name}}<br><p>{{o.original_name}}</p></a></td>
+                            </tr>
+                        {% endfor %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Artist')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% else %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Artist')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                        
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+            <!-- Classifications Modal -->
+            <div class="modal fade" id="classification-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Classifications</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   <table class="example table table-striped table-bordered" style="width:100%">
+                    
+                    <thead>
+                        <tr>
+                        <th>Classifications</th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody>
+                    {% if classcifications %}
+                        {% for o in classcifications %}
+                            <tr>
+                                <td><a class="classification" value="{{o.name}}" name="{{o.id}}">{{o.name}}<br><p>{{o.original_name}}</p></a></td>
+                            </tr>
+                        {% endfor %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Classification')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% else %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Classification')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                        
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+            <!-- Materials Modal -->
+            <div class="modal fade" id="material-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Materials</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   <table  class="example table table-striped table-bordered" style="width:100%">
+                    
+                    <thead>
+                        <tr>
+                        <th>Materials</th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody>
+                    {% if materials %}
+                        {% for o in materials %}
+                            <tr>
+                                <td><a class="material" value="{{o.name}}" name="{{o.id}}">{{o.name}}<br><p>{{o.original_name}}</p></a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Material')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% else %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Material')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                        
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+            <!-- Events Modal -->
+            <div class="modal fade" id="event-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Events</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   <table  class="example table table-striped table-bordered" style="width:100%">
+                    
+                    <thead>
+                        <tr>
+                        <th>Events</th>
+                        </tr>
+                        
+                    </thead>
+                    <tbody>
+                    {% if events %}
+                        {% for o in events %}
+                            <tr>
+                                <td><a class="event" value="{{o.name}}" name="{{o.id}}">{{o.name}}<br><p>{{o.original_name}}</p></a></td>
+                            </tr>
+                        {% endfor %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Event')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% else %}
+                        <tfoot>
+                            <tr>
+                                <th> <!-- Button trigger modal -->
+                                    <button type="button" id="org-btn" class="btn btn-secondary w-100" onclick="add('Event')" data-dismiss="modal" data-toggle="modal" data-target="#add-modal" >
+                                     Add Entry
+                                    </button> 
+                                </th>
+                            </tr>
+                        </tfoot>
+                    {% endif %}
+                        
+                </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
+
+        </section>
+        <section>
+            <div class="row head-bg">
+            <h4 class="col-2">Releases</h4>
+            </div>
+            <div class="releases">
+            
+            </div>
+            <button class="btn btn-info ml-2 mt-3" id="release" type="button" data-toggle="modal" data-target="#release-modal">Add a Release</button>
+            <br>
+            <input type="checkbox" name="canceled" class="ml-2 mt-2" value="True"><span>canceled</span>
+        </section>
+        <section>
+            <br>
+            <p>Version</p>
+            <input type="text" name="version" placeholder="Romaji/English" class="mb-3" style="text-transform:capitalize;" >
+            <br>
+            <p>Original version</p>
+            <input type="text" name="original_version" placeholder="日本語" class="mb-3" >
+            <br>
+            <p>Numbering</p>
+            <input type="number" name="numbering" placeholder="100, 3a, etc." class="mb-3" >
+            <br>
+            <p>Scale</p>
+            <input type="number" name="scale" placeholder="1/" class="mb-3" >
+            <br>
+            <p>Number of parts</p>
+            <input type="number" name="part "placeholder="" class="mb-3" >
+            <br>
+        </section>
+
+         <section>
+            <br>
+            <p>Dimensions</p>
+            <input type="text" name="dimension" placeholder="In (mm)" class="mb-3" >
+            <br>
+            <p>Weight</p>
+            <input type="text" name="weight" placeholder="Weight (g)" class="mb-3" >
+            <br>
+        </section>
+
+        <section>
+            <br>
+            <p>Title</p>
+            <input type="text" name="title" placeholder="Romaji/English" class="mb-3" style="text-transform:capitalize;">
+            <br>
+            <p>Original title</p>
+            <input type="text" name="original_title" placeholder="日本語" class="mb-3">
+            <br>
+            <p>Pages</p>
+            <input type="number" name="page" class="mb-3"  >
+            <br>
+            <p>Paper size</p>
+            <input type="text" name="size" placeholder="A4" class="mb-3">
+            <br>
+            <p>Episodes</p>
+            <input type="number" name="episodes"  class="mb-3" >
+            <br>
+            <p>Tracks</p>
+            <input type="text" name="tracks" placeholder="" class="mb-3" >
+            <br>
+            <p>Discs</p>
+            <input type="text" name="discs" placeholder="" class="mb-3" >
+            <br>
+            <p>Runtime</p>
+            <input type="number" name="runtime" class="mb-3" >
+            <br>
+            <span>Region free</span><input name="region" value="True" type="checkbox"  class="mb-3" >
+        </section>
+
+        <section>
+            <br>
+            <p>Ratings</p>
+            <span>18+</span><input type="checkbox" value="18+" name="rating" class="mb-3" >
+            <br>
+            <p>Description</p>
+            <textarea  class="w-75 mb-3" name="description"></textarea>
+            <br>
+            
+        </section>
+        <button type="submit" class="btn btn-outline-secondary">Submit</button>
+        </form>
+        <!-- Release Modal -->
+            <div class="modal fade" id="release-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered  " role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Events</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body pb-0 mb-0">
+                    <div class="mb-3">
+                    <form id="form_id" method='post'>
+                    {% csrf_token %}
+                        <div class="d-flex justify-content-center">
+                        <input type="date" id="date" value="{{m.dob|date:'Y-m-d'}}" required>
+                        </div>
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="inputGroupSelect01">Run</label>
+                            <select class="custom-select" id="inputGroupSelect01">
+                            <option selected value="Standard">Standard</option>
+                            <option value="Limited">Limited</option>
+                            <option value="Exclusive">Exclusive</option>
+                            <option value="Limited + Exclusive">Limited + Exclusive</option>
+                            <option value="Prize">Prize</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                        </div>
+
+                        <p class="mb-2">Price</p>
+                        <input type="text" id="price" placeholder="¥ (w/o taxes)" class="mb-3 w-100" v>
+                        <br>
+                        <p class="mb-2">Barcode</p>
+                        <input type="text" id="barcode" placeholder="JAN, ISBN-13" class="mb-3 w-100">
+                        <br>
+                        <p class="mb-2">Catalog ID</p>
+                        <input type="text" id="catalog" placeholder="ABCD-1234" class="mb-3 w-100">
+                        <br>
+                        <p class="mb-2">Additional Information</p>
+                        <input type="text" id="info" placeholder="Events, Shops, Countries, Sizes, etc." class="mb-3 w-100">
+                        
+                        </div>
+
+                    
+                </div>
+                <div class="modal-footer pt-0">
+                    <button type="submit" class="btn btn-dark mt-3">Add</button>
+                </div>
+            </form>
+            </div>
+            </div>
+            </div>
+                 <!-- Add Modal -->
+            <div class="modal fade" id="add-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered  " role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Entry</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <div class="modal-body pb-0 mb-0">
+                    <div class="mb-3">
+                        <form id="form_id_1" method='post'>
+                        {% csrf_token %}
+                                <p class="mb-2">Name</p>
+                                <input type="text" id="name" placeholder="" class="mb-3 w-100" v>
+                                <br>
+                                <p class="mb-2">Original Name</p>
+                                <input type="text" id="original" placeholder="日本語" class="mb-3 w-100">
+                                <br>
+                    </div>
+                </div>
+                <div class="modal-footer pt-0">
+                    <button type="submit" class="btn btn-dark mt-3">Add</button>
+                </div>
+                         </form>
+
+                </div>
+            </div>
+            </div>
+            
+    </div>
+</div>
+
+<script>
+function add(val){
+    console.log(val);
+       document.getElementById("url").value= val;
+   }
+</script>
+
+{% endblock content %}

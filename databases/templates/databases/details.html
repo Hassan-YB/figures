@@ -1,0 +1,117 @@
+{% extends 'databases/home.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row d-flex justify-content-center"> 
+        <h3 style="padding-top:10px;">Details</h3>
+    </div>
+    <div class="row" style="margin:10px 50px;">
+        <div class="col-4">
+            <div class="card w-100">
+                <img class="card-img-top" src="{{obj.pic.url}}" alt="Card image cap">
+                <div class="card-body">
+                    <p class="card-text" style="color:#28a745">{{obj.title}}</p>
+                </div>
+            </div>
+            <hr>
+            <a href="{% url 'update' obj.id %}">Edit</a>
+        </div>
+        <div class="col-7">
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Category
+                </button>
+                    {% for i in subcategory %}
+                            <button type="button" class="list-group-item list-group-item-action">
+                                <i class="fa fa-tag" aria-hidden="true"></i>
+                                {{i.category.root.root}}
+                            </button>
+                        <button type="button" class="list-group-item list-group-item-action pl-5" >
+                            <i class="fa fa-tags" aria-hidden="true"></i>
+                                {{i.category.subcategory}}
+                        </button>
+                    {% endfor %}            
+            </div>
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Classification
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{classification.entry.name}}</button>
+            </div>
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Origins
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{origin.entry.name}}</button>
+            </div>
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Characters
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{character.entry.name}}</button>
+            </div>
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Company
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{company.entry.name}}</button>
+            </div>
+            {% if artist %}
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Artists
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{artist.entry.name}}</button>
+            </div>
+            {% endif %}
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Material
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{material.entry.name}}</button>
+            </div>
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Release Date
+                </button>
+                {% for i in release %}
+                    <button type="button" class="list-group-item list-group-item-action">
+                     <i class="fa fa-calendar" aria-hidden="true"></i>
+                     {{i.date}}
+                    </button>
+                    {% if i.price %}
+                    <button type="button" class="list-group-item list-group-item-action">
+                    <i class="fa fa-money" aria-hidden="true"></i>
+                    {{i.price}}</button>
+                    {% endif %}
+                    {% if i.barcode %}
+                     <button type="button" class="list-group-item list-group-item-action">{{i.barcode}}</button>
+                    {% endif %}
+                    {% if i.catalog %}
+                     <button type="button" class="list-group-item list-group-item-action">{{i.catalog}}</button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% if obj.dimension %}
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Scale & Dimensions
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{obj.dimension}}</button>
+
+            </div>
+            {% endif %}
+            {% if obj.entry.events %}
+            <div class="list-group">
+                <button type="button" class="list-group-item list-group-item-action active">
+                    Events
+                </button>
+                <button type="button" class="list-group-item list-group-item-action">{{obj.entry.events.name}}</button>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
